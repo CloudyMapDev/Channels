@@ -1,6 +1,5 @@
 package com.github.rmsy.channels;
 
-import com.github.rmsy.channels.command.GlobalChannelCommands;
 import com.github.rmsy.channels.impl.SimpleChannel;
 import com.github.rmsy.channels.impl.SimplePlayerManager;
 import com.github.rmsy.channels.listener.ChatListener;
@@ -28,10 +27,6 @@ public class ChannelsPlugin extends JavaPlugin {
     private Channel globalChannel;
     /** The default channel. */
     private Channel defaultChannel;
-    /** The commands manager. */
-    private CommandsManager commands;
-    /** The commands' registration. */
-    private CommandsManagerRegistration commandsRegistration;
     /** The player manager. */
     private PlayerManager playerManager;
 
@@ -53,33 +48,9 @@ public class ChannelsPlugin extends JavaPlugin {
         return this.playerManager;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String commandLabel, String[] args) {
-        try {
-            this.commands.execute(cmd.getName(), args, sender, sender);
-        } catch (CommandPermissionsException e) {
-            sender.sendMessage(ChatColor.RED + "You don't have permission.");
-        } catch (MissingNestedCommandException e) {
-            sender.sendMessage(ChatColor.RED + e.getUsage());
-        } catch (CommandUsageException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
-            sender.sendMessage(ChatColor.RED + "Usage: " + e.getUsage());
-        } catch (WrappedCommandException e) {
-            sender.sendMessage(ChatColor.RED + "An unknown error has occurred. Please notify an administrator.");
-            e.printStackTrace();
-        } catch (CommandException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
-        }
-
-        return true;
-    }
-
     @Override
     public void onDisable() {
         HandlerList.unregisterAll(this);
-        this.commandsRegistration = null;
-        this.commands = null;
         this.playerManager = null;
         this.defaultChannel = null;
         this.globalChannel = null;
@@ -104,10 +75,6 @@ public class ChannelsPlugin extends JavaPlugin {
         this.playerManager = new SimplePlayerManager();
         Bukkit.getPluginManager().registerEvents(new ChatListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
-
-        this.commands = new BukkitCommandsManager();
-        this.commandsRegistration = new CommandsManagerRegistration(this, this.commands);
-        this.commandsRegistration.register(GlobalChannelCommands.class);
     }
 
     /**
